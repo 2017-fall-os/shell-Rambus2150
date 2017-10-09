@@ -1,150 +1,100 @@
 //reserved for the shell
-    //this is reserved for the test or main.
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
     #include <sys/wait.h>  
-    #include "myToc.h"
-    #include    <unistd.h>
+    #include <sys/types.h>
+    #include  <unistd.h>
     
-    void myfree(char **cmd);
-    char * concat(char *a,char* b);
-    char **getPathVec(char ** envp);
-    void printToken(char **token);
+        //reserved for helpers
+#include "myToc.h"
+#include "shellHelper.h"
+
+        //cant have more than 10000 chars
+#define BUFF 10000
     int main (int argc, char **argv, char** envp){
     
-    //cant have more than 100 chars
-    char *input = (char*)malloc(100);
+   
     char *exitL = "exit";
     char delimCmd = ' ';
-    
+    char *cd = "cd";
     char ** path=getPathVec(envp);
-    
+    char *input;
     char ** command;
-    char ** dir;
+    int dir;
+   
     
     int wait = 0;
+    
+    int retVal;
     while(1){
-        
+       input =(char*)malloc(BUFF);
         //print a new line
-        ///trying write
-        write(1,'\n',1);
         //Print dollar symbol on console
-       
-        write(1,"$",1);
+        fprintf(stderr,"\n$" );
+        int len=read(0,input,BUFF);
+        input[len-1]='\0';
         
-        read(0,input,100);
-       
-        
+        command = myToc(input,delimCmd);
+        //lazy exit
         if(strncmp(input, exitL,4)==0){
-            printf("now exiting");
+            fprintf(stderr,"now exiting\n");
             return 0;
+        }// lazy change dir
+        
+        if(strncmp(input,cd,2)==0){
+            //remove the command from inputstring
+            input = input+3;
+            dir = chdir(input);
+            if (dir < 0) {
+                fprintf(stderr,  "Dir not found");
+            }
+            continue;
+        }
+         if(hasPipe(input)){
+            myPipe(input,path,envp);
+            continue;
+        }
+        if(hasBack(input)){
+            background(input,path,envp);
+            continue;
         }
         //store the tokens retrieved from the myToc function call
-        command = myToc(input,delimCmd);
-         if(command[0] == 0){
-        continue;
-        }
-       
-        
-        //  write(1,'\n',1);
-       // free(tokens);
+        //has an int value
          pid_t forkVal = fork();
+	 
+        if(forkVal == 0){
+            // write(1,forkVal,10);
+           
+            retVal = execve(command[0], &command[0], envp);
+            char *temp =concat("/",command[0]);
+            ///Looking through tokenized paths to exec
+            
+            for (int i = 0; path[i] != '\0'; i++) { 
+            
+                //Concatinate path to command name
+                char *setp = concat(path[i],temp);
+                command[0]=setp;
+        
+                retVal = execve(command[0], &command[0], envp);
+            
+                }
+        //No paths in PATH were able to execute the command
+            fprintf(stderr, "Command not found\n", command[0], retVal);
+            myFree(command);
+            free(input);
+            return 0;
+        }
+        else{
 
-    if(forkVal == 0){
-      
-      int index = 0;
-      int retVal;
-      
-      retVal = execve(command[0], &command[0], envp);
-    ///Look through tokenized paths and try to exec
-      while(path[index] != 0){ 
-          //Concatinate path to command name
-	char *setp = concat(path[index],command[0]); 
-    
-	retVal = execve(setp, &command[0], envp);
-        index++;
-      }
-      //No paths in PATH were able to execute the command
-      fprintf(stderr, "Command not found\n", command[0], retVal);
-      return 0;
-    }else{
-      
-      waitpid(forkVal, &wait, 0);
-    }
-    
+            waitpid(forkVal, &wait, 0);
+            }
+           
+  // free(input);
+   //myFree(command);
     }
   
   return 0;
 }
         
     
-
-void myFree(char **cmd){
-    int i;
-    for (i = 0; cmd[i] != '\0'; i++) {
-        free(cmd[i]);
-        }
-    free(cmd);
-    }
-    
-char **getPathVec(char ** envp){
-    char delim = ':';
-    int i = 0;
-    char ** path;
-     while(envp[i] != 0){ // Look through envp
-        if(strncmp(envp[i],"PATH=",5) == 0){ // Find PATH=
-            // Trim PATH= from paths string
-            char *pathStr = envp[i];
-            pathStr = pathStr+5;
-      path = myToc(pathStr, delim); // Tokenize paths
-    //testing if path was correctly tokenised
-      write(1,path[0],20);
-      printToken(path);
-      break;
-    }
-    i++;
-  }
-  return path;
-}
-// mending 2 strings togethter
-char * concat(char *a ,char * b){
-    char *newString;
-    int i = 0;
-    int j = 0;
-    int alength = 0;
-    int blength = 0;
-    //waiting to reach out of bounds
-    //to find length
-    while(a[alength] != 0){ 
-        alength++;
-    }
-    while(b[blength] != 0){
-        blength++;
-    }
-    int index = 0;
-    newString = (char *) malloc(alength+blength+2);
-    // Copy a
-    while(index < alength){ 
-        newString[index++] = a[i++];
-    }
-    
-    // adding '/'
-    newString[index++] = '/'; 
-    // add b to a
-    while(index < alength+blength+1){ 
-        newString[index++] = b[j++];
-    }
-    newString[index] = 0;
-    return newString;
-    }
-void printToken(char ** token){
-    int i=0;
-    while(1){
-    write(1,token[i],sizeof(token));
-    if(token[i]=='\0')
-        break;
-    i++;
-        
-    }
-}
