@@ -1,6 +1,6 @@
 //reserve for the helper headers
-#ifndef TokeDef
-#define TokeDef
+#ifndef shellDef
+#define shellDef
 
 void myFree(char **input);
 char * concat(char *a,char* b);
@@ -9,5 +9,6 @@ void printToken(char **token);
 int hasPipe(char* input);
 int hasBack(char* input);
 void myPipe(char* input, char** path, char** envp);
-void background(char* input, char** path char** envp);
+void background(char* input, char** path, char** envp);
+
 #endif

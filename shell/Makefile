@@ -1,13 +1,13 @@
 all: myShell
 
-##CFLAGS=-g -02
-myShell: shellHelper.o myShell.o myToc.o 
+CFLAGS=-g -01
+myShell: myShell.o myToc.o shellHelper.o 
 	cc  myToc.o shellHelper.o myShell.o -o myShell
 
 myShell.o: myToc.h shellHelper.h
 	cc -c myShell.c
 
-shellHelper.o: shellHelper.h shellHelper.c 
+shellHelper.o: shellHelper.c  shellHelper.h
 	cc -c shellHelper.c
 
 myToc.o: myToc.c myToc.h

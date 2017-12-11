@@ -1,6 +1,5 @@
 //reserved for helpers
-#include "myToc.h"
-#include "shellHelper.h"
+
 
 #include <stdio.h>
 #include <stdlib.h>    
@@ -9,6 +8,9 @@
 #include <sys/wait.h>  
 #include  <unistd.h>
 
+#include "myToc.h"
+#include "shellHelper.h"
+
 
 void myFree(char **input){
  
@@ -16,7 +18,7 @@ void myFree(char **input){
       free(input[i]);
         }
     free(input);
-     fprintf(stderr,"Freeing memory" );
+     //fprintf(stderr,"Freeing memory" );
     }//end freeMemory
     
 char **getPathVec(char ** envp){
@@ -141,7 +143,7 @@ void myPipe(char* input, char** path, char** envp) {
             retA = execve(commandLeft[0], &commandLeft[0], envp);
         }
        
-       fprintf(stderr, "Command not found\n");
+       //fprintf(stderr, "Command not found\n");
         exit(0);
 
     } 
@@ -165,7 +167,7 @@ void myPipe(char* input, char** path, char** envp) {
             commandRight[0] = setCommand;
             retB = execve(commandRight[0], &commandRight[0], envp);
         }
-        fprintf(stderr, "Command not found\n");
+        //fprintf(stderr, "Command not found\n");
         exit(2);
     } 
     //need to clode pipes
@@ -197,7 +199,7 @@ void myPipe(char* input, char** path, char** envp) {
             command[0] = commandTst;
             retVal = execve(command[0], &command[0], envp);
         }
-        fprintf(stderr, "Command not found\n");
+        //fprintf(stderr, "Command not found\n");
         exit(0);
     } 
     else {

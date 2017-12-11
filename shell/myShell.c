@@ -31,14 +31,14 @@
        input =(char*)malloc(BUFF);
         //print a new line
         //Print dollar symbol on console
-        fprintf(stderr,"\n$" );
+        //fprintf(stderr,"\n$" );
         int len=read(0,input,BUFF);
         input[len-1]='\0';
         
         command = myToc(input,delimCmd);
         //lazy exit
         if(strncmp(input, exitL,4)==0){
-            fprintf(stderr,"now exiting\n");
+            //fprintf(stderr,"now exiting\n");
             return 0;
         }// lazy change dir
         
@@ -47,7 +47,7 @@
             input = input+3;
             dir = chdir(input);
             if (dir < 0) {
-                fprintf(stderr,  "Dir not found");
+                //fprintf(stderr,  "Dir not found");
             }
             continue;
         }
@@ -80,7 +80,7 @@
             
                 }
         //No paths in PATH were able to execute the command
-            fprintf(stderr, "Command not found\n", command[0], retVal);
+            //fprintf(stderr, "Command not found\n", command[0], retVal);
             myFree(command);
             free(input);
             return 0;
